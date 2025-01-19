@@ -1,0 +1,16 @@
+{
+  "name": "thedevopser/castor-symfony",
+  "type": "symfony-pack",
+  "version": "1.0",
+  "license": "MIT",
+  "description": "Crée un fichier castor avec les commandes utiles pour Symfony",
+  "require": {
+    "php": ">=8.1"
+  },
+  "extra": {
+    "symfony": {
+      "allow-contrib": false,
+      "endpoint": "https://raw.githubusercontent.com/thedevopser/castor-symfony/main/manifest.json"
+    }
+  }
+}
