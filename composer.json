@@ -1,7 +1,6 @@
 {
   "name": "thedevopser/castor-symfony",
   "type": "symfony-pack",
-  "version": "1.0",
   "license": "MIT",
   "description": "Crée un fichier castor avec les commandes utiles pour Symfony",
   "require": {}
