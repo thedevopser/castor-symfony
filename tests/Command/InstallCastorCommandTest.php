@@ -20,7 +20,7 @@ class InstallCastorCommandTest extends TestCase
         $this->kernel = $this->createMock(KernelInterface::class);
         $this->filesystem = new Filesystem();
         $this->projectDir = sys_get_temp_dir() . '/castor_test';
-        $this->bundleDir = dirname(__DIR__, 2) . '/src/Data';
+        $this->bundleDir = dirname(__DIR__, ) . '/Data';
 
         $this->kernel->method('getProjectDir')
             ->willReturn($this->projectDir);
