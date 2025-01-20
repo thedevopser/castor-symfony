@@ -15,7 +15,6 @@ class CastorExtension extends Extension
 
         $container->register(InstallCastorCommand::class)
             ->addTag('console.command')
-            ->addArgument('%kernel.project_dir%')
             ->setAutoconfigured(true)
             ->setAutowired(true);
     }
