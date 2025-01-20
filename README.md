@@ -19,9 +19,31 @@ return [
 ];
 ```
 
-3. Installez le fichier castor.php à la racine de votre projet :
+3. Installez les fichiers castor.php et castorPersonal.php à la racine de votre projet :
 ```bash
 php bin/console castor:install
+```
+
+## Personnalisation
+
+Le bundle installe deux fichiers à la racine de votre projet :
+- `castor.php` : Le fichier principal contenant les tâches prédéfinies
+- `castorPersonal.php` : Un fichier pour vos tâches personnalisées
+
+Le fichier `castorPersonal.php` est créé lors de la première installation et n'est jamais écrasé lors des mises à jour du bundle. C'est l'endroit idéal pour ajouter vos propres tâches et personnalisations.
+
+Exemple de personnalisation dans `castorPersonal.php` :
+```php
+<?php
+
+use Castor\Attribute\AsTask;
+use function Castor\run;
+
+#[AsTask(description: 'Ma tâche personnalisée')]
+function maTask(): void
+{
+    run('echo "Hello from my custom task!"');
+}
 ```
 
 ## Tâches disponibles
@@ -85,9 +107,31 @@ return [
 ];
 ```
 
-3. Install the castor.php file at the root of your project:
+3. Install the castor.php and castorPersonal.php files at the root of your project:
 ```bash
 php bin/console castor:install
+```
+
+## Customization
+
+The bundle installs two files at the root of your project:
+- `castor.php`: The main file containing predefined tasks
+- `castorPersonal.php`: A file for your custom tasks
+
+The `castorPersonal.php` file is created during the first installation and is never overwritten during bundle updates. This is the ideal place to add your own tasks and customizations.
+
+Example of customization in `castorPersonal.php`:
+```php
+<?php
+
+use Castor\Attribute\AsTask;
+use function Castor\run;
+
+#[AsTask(description: 'My custom task')]
+function myTask(): void
+{
+    run('echo "Hello from my custom task!"');
+}
 ```
 
 ## Available Tasks

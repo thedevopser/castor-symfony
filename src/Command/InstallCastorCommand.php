@@ -57,6 +57,20 @@ class InstallCastorCommand extends Command
 
             $io->success('Le fichier castor.php a été installé avec succès à la racine du projet.');
 
+            $sourcePersonal = $this->bundleDir . '/castorPersonal.php';
+            $targetPersonal = $this->projectDir . '/castorPersonal.php';
+
+            if (!$this->filesystem->exists($sourcePersonal)) {
+                throw new \RuntimeException('Le fichier source castorPersonal.php est introuvable dans le bundle.');
+            }
+
+            if (!$this->filesystem->exists($targetPersonal)) {
+                $this->filesystem->copy($sourcePersonal, $targetPersonal);
+                $io->success('Le fichier castorPersonal.php a été créé avec succès.');
+            } else {
+                $io->info('Le fichier castorPersonal.php existe déjà et a été conservé pour préserver vos personnalisations.');
+            }
+
             return Command::SUCCESS;
         } catch (\Exception $e) {
             $io->error('Une erreur est survenue lors de l\'installation : ' . $e->getMessage());

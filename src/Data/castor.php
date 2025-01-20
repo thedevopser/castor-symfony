@@ -5,6 +5,9 @@ use Castor\Attribute\AsTask;
 use function Castor\io;
 use function Castor\capture;
 use function Castor\run;
+use function Castor\import;
+
+import(__DIR__ . '/castorPersonal.php');
 
 /**
  * Installation et Initialisation
