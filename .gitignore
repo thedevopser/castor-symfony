@@ -1,6 +1,54 @@
+# Cache and logs
+/var/
+/logs/
+*.log
+
+# Managed by Composer
 /vendor/
-composer.lock
-.idea/
+/composer.lock
+composer.phar
+
+# PHPUnit
+.phpunit
+.phpunit.result.cache
+/phpunit.xml
+/coverage/
+
+# PHP CS Fixer
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+
+# IDEs and editors
+/.idea/
+/.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# OS generated files
 .DS_Store
-.castor.stub.php
-/1.0/
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Test artifacts
+Tests/Fixtures/cache/
+Tests/Fixtures/logs/
+
+# Build artifacts
+/build/
+
+# Documentation
+/doc/_build/
+
+# Local development files
+.env.local
+.env.local.php
+.env.*.local
+config/secrets/prod/prod.decrypt.private.php
+/.castor.stub.php

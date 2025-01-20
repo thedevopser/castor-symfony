@@ -1,7 +1,38 @@
 {
   "name": "thedevopser/castor-symfony",
-  "type": "symfony-pack",
+  "description": "Bundle Symfony pour installer le fichier castor.php",
+  "type": "symfony-bundle",
   "license": "MIT",
-  "description": "Crée un fichier castor avec les commandes utiles pour Symfony",
-  "require": {}
+  "authors": [
+    {
+      "name": "TheDevOpser",
+      "email": "sylvain.anglade@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=8.1",
+    "symfony/framework-bundle": "^6.0|^7.0",
+    "symfony/console": "^6.0|^7.0",
+    "symfony/filesystem": "^6.0|^7.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5",
+    "symfony/phpunit-bridge": "^6.0|^7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "TheDevOpser\\CastorBundle\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "TheDevOpser\\CastorBundle\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    }
+  },
+  "minimum-stability": "stable"
 }

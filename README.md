@@ -6,8 +6,22 @@ Ce bundle fournit un ensemble de tâches Castor pour faciliter le développement
 
 ## Installation
 
+1. Installez le bundle via Composer :
 ```bash
 composer require thedevopser/castor-symfony
+```
+
+2. Enregistrez le bundle dans votre application en ajoutant la ligne suivante dans `config/bundles.php` :
+```php
+return [
+    // ...
+    TheDevOpser\CastorBundle\CastorBundle::class => ['all' => true],
+];
+```
+
+3. Installez le fichier castor.php à la racine de votre projet :
+```bash
+php bin/console castor:install
 ```
 
 ## Tâches disponibles
@@ -58,8 +72,22 @@ This bundle provides a set of Castor tasks to facilitate the development and dep
 
 ## Installation
 
+1. Install the bundle via Composer:
 ```bash
 composer require thedevopser/castor-symfony
+```
+
+2. Register the bundle in your application by adding the following line in `config/bundles.php`:
+```php
+return [
+    // ...
+    TheDevOpser\CastorBundle\CastorBundle::class => ['all' => true],
+];
+```
+
+3. Install the castor.php file at the root of your project:
+```bash
+php bin/console castor:install
 ```
 
 ## Available Tasks
