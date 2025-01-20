@@ -98,7 +98,7 @@ function phpstan(): void
 {
     $projectPath = getcwd();
     io()->info('Analyse du projet avec PHPStan');
-    run('docker run --rm -v ' . $projectPath . ':/app -w /app jakzal/phpqa:latest phpstan analyse -c ./quality/phpstan.neon');
+    run('docker run --rm -v ' . $projectPath . ':/app -w /app jakzal/phpqa:php8.3 phpstan analyse -c phpstan.neon');
 }
 
 #[AsTask(description: 'Check la validation en PSR12')]
@@ -106,7 +106,7 @@ function phpcsfixer(): void
 {
     $projectPath = getcwd();
     io()->info('Analyse du projet avec PHPCsFixer');
-    run('docker run --rm -v ' . $projectPath . ':/app -w /app jakzal/phpqa:latest php-cs-fixer --config=./quality/.php-cs-fixer.dist.php fix ./src');
+    run('docker run --rm -v ' . $projectPath . ':/app -w /app jakzal/phpqa:php8.3 php-cs-fixer --config=.php-cs-fixer.dist.php fix');
 }
 
 #[AsTask(description: 'Fix les erreurs PSR12')]
@@ -114,7 +114,7 @@ function phpcbf(): void
 {
     $projectPath = getcwd();
     io()->info('Analyse du projet avec PHPCbf');
-    run('docker run --rm -v ' . $projectPath . ':/app -w /app jakzal/phpqa:latest phpcbf --standard=PSR12 --colors src tests || true');
+    run('docker run --rm -v ' . $projectPath . ':/app -w /app jakzal/phpqa:php8.3 phpcbf --standard=PSR12 --colors src tests || true');
 }
 
 /**
