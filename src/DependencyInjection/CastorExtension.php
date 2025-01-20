@@ -2,9 +2,7 @@
 
 namespace TheDevOpser\CastorBundle\DependencyInjection;
 
-use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use TheDevOpser\CastorBundle\Command\InstallCastorCommand;
 
@@ -15,9 +13,11 @@ class CastorExtension extends Extension
         $configuration = new Configuration();
         $this->processConfiguration($configuration, $configs);
 
-        $container->autowire(InstallCastorCommand::class)
+        $container->register(InstallCastorCommand::class)
             ->addTag('console.command')
-            ->setPublic(false);
+            ->addArgument('%kernel.project_dir%')
+            ->setAutoconfigured(true)
+            ->setAutowired(true);
     }
 
     public function getAlias(): string
