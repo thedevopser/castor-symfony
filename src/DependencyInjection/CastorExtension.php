@@ -6,6 +6,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use TheDevOpser\CastorBundle\Command\InstallCastorCommand;
 
 class CastorExtension extends Extension
 {
@@ -14,7 +15,7 @@ class CastorExtension extends Extension
         $configuration = new Configuration();
         $this->processConfiguration($configuration, $configs);
 
-        $container->autowire(Command\InstallCastorCommand::class)
+        $container->autowire(InstallCastorCommand::class)
             ->addTag('console.command')
             ->setPublic(false);
     }
