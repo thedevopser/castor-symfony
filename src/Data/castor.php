@@ -57,13 +57,20 @@ function project_init(bool $node = false, bool $migrate = false) {
 }
 
 #[AsTask(description: 'Installe les paquets')]
-function install_packages(): void
+function install_packages(bool $node = false): void
 {
     io()->title('Installation du projet');
-    $nodePacketManager = io()->ask('Quel packet manager utilisez-vous ? (yarn/npm)');
 
     run('composer install');
-    run($nodePacketManager . ' install');
+    
+    if ($node) {
+        $nodePacketManager = io()->ask('Quel packet manager utilisez-vous ? (yarn/npm)');
+        run($nodePacketManager . ' install');
+    }
+    
+
+    
+    
 }
 
 /**

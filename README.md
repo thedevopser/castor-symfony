@@ -55,6 +55,8 @@ function maTask(): void
         - `--node` : Active l'installation des dépendances Node.js
         - `--migrate` : Execute les migrations après l'initialisation
 - `castor install-packages` : Installe les dépendances Composer et Node.js
+    - Options :
+        - `--node` : Active la prise en charge de Node.Js
 
 ### Base de données
 
