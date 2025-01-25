@@ -7,11 +7,13 @@ Ce bundle fournit un ensemble de tâches Castor pour faciliter le développement
 ## Installation
 
 1. Installez le bundle via Composer :
+
 ```bash
 composer require thedevopser/castor-symfony
 ```
 
 2. Enregistrez le bundle dans votre application en ajoutant la ligne suivante dans `config/bundles.php` :
+
 ```php
 return [
     // ...
@@ -20,19 +22,24 @@ return [
 ```
 
 3. Installez les fichiers castor.php et castorPersonal.php à la racine de votre projet :
+
 ```bash
 php bin/console castor:install
 ```
 
+**Note:** Lors des mises à jour du bundle, relancez cette commande pour obtenir la dernière version du fichier `castor.php`. Le fichier `castorPersonal.php` ne sera pas écrasé.
+
 ## Personnalisation
 
 Le bundle installe deux fichiers à la racine de votre projet :
+
 - `castor.php` : Le fichier principal contenant les tâches prédéfinies
 - `castorPersonal.php` : Un fichier pour vos tâches personnalisées
 
 Le fichier `castorPersonal.php` est créé lors de la première installation et n'est jamais écrasé lors des mises à jour du bundle. C'est l'endroit idéal pour ajouter vos propres tâches et personnalisations.
 
 Exemple de personnalisation dans `castorPersonal.php` :
+
 ```php
 <?php
 
@@ -51,12 +58,12 @@ function maTask(): void
 ### Installation et Initialisation
 
 - `castor project-init [--node] [--migrate]` : Initialise un nouveau projet Symfony
-    - Options :
-        - `--node` : Active l'installation des dépendances Node.js
-        - `--migrate` : Execute les migrations après l'initialisation
+  - Options :
+    - `--node` : Active l'installation des dépendances Node.js
+    - `--migrate` : Execute les migrations après l'initialisation
 - `castor install-packages` : Installe les dépendances Composer et Node.js
-    - Options :
-        - `--node` : Active la prise en charge de Node.Js
+  - Options :
+    - `--node` : Active la prise en charge de Node.Js
 
 ### Base de données
 
@@ -73,8 +80,8 @@ function maTask(): void
 ### Gestion Git
 
 - `castor pull-main [--migrate]` : Met à jour la branche principale
-    - Options :
-        - `--migrate` : Execute les migrations après la mise à jour
+  - Options :
+    - `--migrate` : Execute les migrations après la mise à jour
 - `castor rebase {branch}` : Rebase une branche sur main
 
 ### Docker
@@ -85,8 +92,8 @@ function maTask(): void
 ### Maintenance
 
 - `castor clean [env]` : Nettoie le cache
-    - Arguments :
-        - `env` : Environnement cible (défaut: 'dev')
+  - Arguments :
+    - `env` : Environnement cible (défaut: 'dev')
 
 ---
 
@@ -97,11 +104,13 @@ This bundle provides a set of Castor tasks to facilitate the development and dep
 ## Installation
 
 1. Install the bundle via Composer:
+
 ```bash
 composer require thedevopser/castor-symfony
 ```
 
 2. Register the bundle in your application by adding the following line in `config/bundles.php`:
+
 ```php
 return [
     // ...
@@ -110,19 +119,24 @@ return [
 ```
 
 3. Install the castor.php and castorPersonal.php files at the root of your project:
+
 ```bash
 php bin/console castor:install
 ```
 
+**Note:** During bundle updates, rerun this command to get the latest version of the `castor.php` file. The `castorPersonal.php` file will not be overwritten.
+
 ## Customization
 
 The bundle installs two files at the root of your project:
+
 - `castor.php`: The main file containing predefined tasks
 - `castorPersonal.php`: A file for your custom tasks
 
 The `castorPersonal.php` file is created during the first installation and is never overwritten during bundle updates. This is the ideal place to add your own tasks and customizations.
 
 Example of customization in `castorPersonal.php`:
+
 ```php
 <?php
 
@@ -141,9 +155,9 @@ function myTask(): void
 ### Installation and Initialization
 
 - `castor project-init [--node] [--migrate]`: Initializes a new Symfony project
-    - Options:
-        - `--node`: Enables Node.js dependencies installation
-        - `--migrate`: Executes migrations after initialization
+  - Options:
+    - `--node`: Enables Node.js dependencies installation
+    - `--migrate`: Executes migrations after initialization
 - `castor install-packages`: Installs Composer and Node.js dependencies
 
 ### Database
@@ -161,8 +175,8 @@ function myTask(): void
 ### Git Management
 
 - `castor pull-main [--migrate]`: Updates the main branch
-    - Options:
-        - `--migrate`: Executes migrations after update
+  - Options:
+    - `--migrate`: Executes migrations after update
 - `castor rebase {branch}`: Rebases a branch onto main
 
 ### Docker
@@ -173,5 +187,5 @@ function myTask(): void
 ### Maintenance
 
 - `castor clean [env]`: Cleans the cache
-    - Arguments:
-        - `env`: Target environment (default: 'dev')
+  - Arguments:
+    - `env`: Target environment (default: 'dev')
