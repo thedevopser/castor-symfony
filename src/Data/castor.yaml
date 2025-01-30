@@ -1,0 +1,6 @@
+castor:
+    vhost:
+        url: "test"
+        nom: ~  # Sera remplacé par le nom du dossier du projet
+        server: "apache2"
+        os: ~    # Sera détecté automatiquement
