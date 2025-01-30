@@ -38,43 +38,112 @@ class InstallCastorCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $sourceFile = $this->bundleDir . '/castor.php';
-        $targetFile = $this->projectDir . '/castor.php';
-
         try {
-            if (!$this->filesystem->exists($sourceFile)) {
-                throw new \RuntimeException('Le fichier source castor.php est introuvable dans le bundle.');
-            }
-
-            if ($this->filesystem->exists($targetFile)) {
-                if (!$io->confirm('Le fichier castor.php existe déjà. Voulez-vous le remplacer ?', false)) {
-                    $io->warning('Installation annulée.');
-                    return Command::SUCCESS;
-                }
-            }
-
-            $this->filesystem->copy($sourceFile, $targetFile, true);
-
-            $io->success('Le fichier castor.php a été installé avec succès à la racine du projet.');
-
-            $sourcePersonal = $this->bundleDir . '/castorPersonal.php';
-            $targetPersonal = $this->projectDir . '/castorPersonal.php';
-
-            if (!$this->filesystem->exists($sourcePersonal)) {
-                throw new \RuntimeException('Le fichier source castorPersonal.php est introuvable dans le bundle.');
-            }
-
-            if (!$this->filesystem->exists($targetPersonal)) {
-                $this->filesystem->copy($sourcePersonal, $targetPersonal);
-                $io->success('Le fichier castorPersonal.php a été créé avec succès.');
-            } else {
-                $io->info('Le fichier castorPersonal.php existe déjà et a été conservé pour préserver vos personnalisations.');
-            }
+            $this->assertSourceFilesExist();
+            $this->installCastorFiles($io);
+            $this->installConfiguration($io);
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
             $io->error('Une erreur est survenue lors de l\'installation : ' . $e->getMessage());
             return Command::FAILURE;
         }
+    }
+
+    private function assertSourceFilesExist(): void
+    {
+        $requiredFiles = ['castor.php', 'castorPersonal.php', 'castor.yaml'];
+        
+        foreach ($requiredFiles as $file) {
+            $this->assertFileExists($this->bundleDir . '/' . $file);
+        }
+    }
+
+    private function assertFileExists(string $file): void
+    {
+        if (!$this->filesystem->exists($file)) {
+            throw new \RuntimeException(sprintf('Le fichier source %s est introuvable dans le bundle.', basename($file)));
+        }
+    }
+
+    private function installCastorFiles(SymfonyStyle $io): void
+    {
+        $this->installMainCastorFile($io);
+        $this->installPersonalCastorFile($io);
+    }
+
+    private function installMainCastorFile(SymfonyStyle $io): void
+    {
+        $targetFile = $this->projectDir . '/castor.php';
+        $this->handleExistingFile($targetFile, $io);
+        
+        $this->filesystem->copy($this->bundleDir . '/castor.php', $targetFile, true);
+        $io->success('Le fichier castor.php a été installé avec succès.');
+    }
+
+    private function installPersonalCastorFile(SymfonyStyle $io): void
+    {
+        $targetFile = $this->projectDir . '/castorPersonal.php';
+        $this->createFileIfNotExists($targetFile, $io);
+    }
+
+    private function handleExistingFile(string $file, SymfonyStyle $io): void
+    {
+        $fileExists = $this->filesystem->exists($file);
+        $shouldReplace = $fileExists && $io->confirm(
+            sprintf('Le fichier %s existe déjà. Voulez-vous le remplacer ?', basename($file)),
+            false
+        );
+
+        if ($fileExists && !$shouldReplace) {
+            throw new \RuntimeException('Installation annulée par l\'utilisateur.');
+        }
+    }
+
+    private function createFileIfNotExists(string $file, SymfonyStyle $io): void
+    {
+        $exists = $this->filesystem->exists($file);
+        $message = $exists 
+            ? 'Le fichier %s existe déjà et a été conservé.'
+            : 'Le fichier %s a été créé avec succès.';
+
+        $exists || $this->filesystem->copy($this->bundleDir . '/castorPersonal.php', $file);
+        $io->info(sprintf($message, basename($file)));
+    }
+
+    private function installConfiguration(SymfonyStyle $io): void
+    {
+        $configDir = $this->projectDir . '/config/packages';
+        $targetFile = $configDir . '/castor.yaml';
+
+        $this->filesystem->exists($targetFile) 
+            ? $io->info('Le fichier de configuration existe déjà et a été conservé.')
+            : $this->createConfiguration($configDir, $targetFile, $io);
+    }
+
+    private function createConfiguration(string $configDir, string $targetFile, SymfonyStyle $io): void
+    {
+        $this->filesystem->mkdir($configDir);
+        $this->filesystem->dumpFile($targetFile, $this->prepareConfigurationContent());
+        $io->success('Le fichier de configuration castor.yaml a été créé avec succès.');
+    }
+
+    private function prepareConfigurationContent(): string
+    {
+        $config = file_get_contents($this->bundleDir . '/castor.yaml');
+        $projectName = basename($this->projectDir);
+        $os = $this->detectOS();
+
+        return strtr($config, [
+            'nom: ~' => sprintf('nom: "%s"', $projectName),
+            'os: ~' => sprintf('os: "%s"', $os)
+        ]);
+    }
+
+    private function detectOS(): string 
+    {
+        return file_exists('/etc/debian_version') 
+            ? 'debian' 
+            : (file_exists('/etc/redhat-release') ? 'rhel' : 'debian');
     }
 }
