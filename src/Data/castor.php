@@ -6,8 +6,10 @@ use function Castor\io;
 use function Castor\capture;
 use function Castor\run;
 use function Castor\import;
+use function Castor\yaml_parse;
 
 import(__DIR__ . '/castorPersonal.php');
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Installation et Initialisation
@@ -200,38 +202,35 @@ function loadVhostConfig(): array
 {
     try {
         $projectDir = getcwd();
-        require_once $projectDir . '/vendor/autoload.php';
+        $configFile = $projectDir . '/config/packages/castor.yaml';
         
-        $kernelClass = $_SERVER['KERNEL_CLASS'] ?? 'App\\Kernel';
-        $env = $_SERVER['APP_ENV'] ?? 'dev';
-        $debug = (bool) ($_SERVER['APP_DEBUG'] ?? true);
+        if (!file_exists($configFile)) {
+            throw new \RuntimeException('Configuration castor.yaml manquante dans config/packages/');
+        }
+
+        $config = yaml_parse(file_get_contents($configFile));
         
-        if (!class_exists($kernelClass)) {
-            throw new \RuntimeException('Impossible de trouver la classe Kernel. Êtes-vous dans un projet Symfony ?');
+        if (!isset($config['castor']['vhost'])) {
+            throw new \RuntimeException('Configuration vhost manquante dans castor.yaml');
         }
         
-        /** @var \Symfony\Component\HttpKernel\KernelInterface $kernel */
-        $kernel = new $kernelClass($env, $debug);
-        $kernel->boot();
-        
-        $config = $kernel->getContainer()->getParameter('castor.vhost');
-        
-        if (empty($config)) {
-            throw new \RuntimeException('Configuration vhost manquante dans config/packages/castor.yaml');
-        }
-        
-        return $config;
+        return $config['castor']['vhost'];
     } catch (\Throwable $e) {
         throw new \RuntimeException(
-            "Impossible de charger la configuration Symfony.\n" .
+            "Impossible de charger la configuration.\n" .
             "Erreur: " . $e->getMessage()
         );
     }
 }
 
+use Castor\Context;
+
 function assertSudoRights(): void 
 {
-    $result = run('sudo -n true 2>/dev/null', allowFailure: true);
+    $context = new Context();
+    $context->withAllowFailure();
+    
+    $result = run('sudo -n true 2>/dev/null', context: $context);
     
     if (!$result->isSuccessful()) {
         throw new \RuntimeException('Droits sudo requis pour créer le vhost');
@@ -261,6 +260,7 @@ function createApacheVhost(string $serverName, string $documentRoot, bool $ssl, 
 {
     $isDebianBased = in_array($os, ['debian', 'ubuntu']);
     $configPath = $isDebianBased ? '/etc/apache2/sites-available' : '/etc/httpd/conf.d';
+    $logPath = $isDebianBased ? '/var/log/apache2' : '/var/log/httpd';
     $configFile = sprintf('%s/%s.conf', $configPath, $serverName);
 
     // Vérifier si le fichier existe déjà
@@ -277,24 +277,41 @@ function createApacheVhost(string $serverName, string $documentRoot, bool $ssl, 
     DocumentRoot {$documentRoot}
     
     <Directory {$documentRoot}>
+        Options Indexes FollowSymLinks
         AllowOverride All
         Require all granted
     </Directory>
     
-    ErrorLog \${APACHE_LOG_DIR}/{$serverName}_error.log
-    CustomLog \${APACHE_LOG_DIR}/{$serverName}_access.log combined
+    ErrorLog {$logPath}/{$serverName}_error.log
+    CustomLog {$logPath}/{$serverName}_access.log combined
 </VirtualHost>
 EOF;
+
+    if ($ssl) {
+        io()->warning('SSL ignoré pour les environnements locaux (.test, .local, etc.)');
+        io()->info('Pour un certificat SSL en production, utilisez Let\'s Encrypt manuellement.');
+    }
 
     file_put_contents('/tmp/vhost.conf', $template);
     run(sprintf('sudo mv /tmp/vhost.conf %s', $configFile));
 
+    $context = new Context();
+    $context->withAllowFailure();
+
     // Activation du vhost selon l'OS
     if ($isDebianBased) {
-        run(sprintf('sudo a2ensite %s.conf', $serverName));
-        run('sudo systemctl restart apache2');
+        run(sprintf('sudo a2ensite %s.conf', $serverName), context: $context);
+        $result = run('sudo systemctl restart apache2', context: $context);
     } else {
-        run('sudo systemctl restart httpd');
+        $result = run('sudo systemctl restart httpd', context: $context);
+    }
+
+    if (!$result->isSuccessful()) {
+        io()->error(sprintf(
+            "Erreur lors du redémarrage du serveur web.\nConsultez les logs avec : %s",
+            $isDebianBased ? 'journalctl -xe apache2' : 'journalctl -xeu httpd.service'
+        ));
+        throw new \RuntimeException('Échec du redémarrage du serveur web');
     }
 }
 
@@ -330,10 +347,18 @@ EOF;
 
     file_put_contents('/tmp/vhost.conf', $template);
     run('sudo mv /tmp/vhost.conf /etc/nginx/sites-available/' . $serverName . '.conf');
+
+    if ($ssl) {
+        io()->warning('SSL ignoré pour les environnements locaux (.test, .local, etc.)');
+        io()->info('Pour un certificat SSL en production, utilisez Let\'s Encrypt manuellement.');
+    }
 }
 
 function canSudo(): bool 
 {
-    $result = run('sudo -n true 2>/dev/null', allowFailure: true);
+    $context = new Context();
+    $context->withAllowFailure();
+    
+    $result = run('sudo -n true 2>/dev/null', context: $context);
     return $result->isSuccessful();
 }
