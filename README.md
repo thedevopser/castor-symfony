@@ -4,6 +4,10 @@
 
 Ce bundle fournit un ensemble de tâches Castor pour faciliter le développement et le déploiement d'applications Symfony.
 
+## Pré-requis
+
+Ce bundle nécessite l'installation préalable de Castor CLI sur votre système. Pour l'installer, suivez les instructions sur la [page d'installation officielle de Castor](https://castor.jolicode.com/installation/).
+
 ## Installation
 
 1. Installez le bundle via Composer :
@@ -100,6 +104,10 @@ function maTask(): void
 # Symfony Castor Bundle
 
 This bundle provides a set of Castor tasks to facilitate the development and deployment of Symfony applications.
+
+## Prerequisites
+
+This bundle requires Castor CLI to be installed on your system. To install it, follow the instructions on the [official Castor installation page](https://castor.jolicode.com/installation/).
 
 ## Installation
 
