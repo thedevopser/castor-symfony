@@ -10,20 +10,18 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-#[AsCommand(
-    name: 'castor:install',
-    description: 'Installe le fichier castor.php à la racine du projet'
-)]
 class InstallCastorCommand extends Command
 {
-    private string $projectDir;
-    private string $bundleDir;
-    private Filesystem $filesystem;
+    // Définir le nom et la description comme propriétés statiques
+    protected static $defaultName = 'castor:install';
+    protected static $defaultDescription = 'Installe le fichier castor.php à la racine du projet';
 
-    public function __construct(
-        KernelInterface $kernel,
-        ?string $bundleDir = null
-    ) {
+    private $projectDir;
+    private $bundleDir;
+    private $filesystem;
+
+    public function __construct(KernelInterface $kernel, ?string $bundleDir = null)
+    {
         parent::__construct();
 
         $this->projectDir = $kernel->getProjectDir();
@@ -33,7 +31,9 @@ class InstallCastorCommand extends Command
 
     protected function configure(): void
     {
-        $this->setDescription('Installe le fichier castor.php à la racine du projet');
+        $this
+            ->setName(self::$defaultName)
+            ->setDescription(self::$defaultDescription);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
