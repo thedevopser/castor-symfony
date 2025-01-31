@@ -1,0 +1,52 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  symfony-compatibility:
+    name: Symfony ${{ matrix.symfony }} (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - symfony: '5.4.*'
+            php: '8.0'
+          - symfony: '6.4.*'
+            php: '8.1'
+          - symfony: '7.0.*'
+            php: '8.2'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xml, ctype, iconv, intl
+
+      - name: Create Symfony project
+        run: |
+          composer create-project symfony/skeleton:"${{ matrix.symfony }}" symfony-app
+          cd symfony-app
+
+      - name: Install Bundle
+        run: |
+          cd symfony-app
+          composer config repositories.castor-symfony '{"type": "path", "url": "../", "options": {"symlink": true}}'
+          composer require thedevopser/castor-symfony
+          
+      - name: Verify Installation
+        run: |
+          cd symfony-app
+          php bin/console debug:container TheDevOpser\\CastorBundle\\CastorBundle
+          php bin/console castor:install --no-interaction
+          test -f castor.php || exit 1
+          test -f castorPersonal.php || exit 1
+          test -f config/packages/castor.yaml || exit 1

@@ -20,12 +20,14 @@ class InstallCastorCommand extends Command
     private string $bundleDir;
     private Filesystem $filesystem;
 
-    public function __construct(KernelInterface $kernel)
-    {
+    public function __construct(
+        KernelInterface $kernel,
+        ?string $bundleDir = null
+    ) {
         parent::__construct();
 
         $this->projectDir = $kernel->getProjectDir();
-        $this->bundleDir = dirname(__DIR__, 1) . '/Data';
+        $this->bundleDir = $bundleDir ?? dirname(__DIR__, 1) . '/Data';
         $this->filesystem = new Filesystem();
     }
 
@@ -44,6 +46,9 @@ class InstallCastorCommand extends Command
             $this->installConfiguration($io);
 
             return Command::SUCCESS;
+        } catch (\RuntimeException $e) {
+            $io->error($e->getMessage());
+            return Command::FAILURE;
         } catch (\Exception $e) {
             $io->error('Une erreur est survenue lors de l\'installation : ' . $e->getMessage());
             return Command::FAILURE;
@@ -52,17 +57,15 @@ class InstallCastorCommand extends Command
 
     private function assertSourceFilesExist(): void
     {
-        $requiredFiles = ['castor.php', 'castorPersonal.php', 'castor.yaml'];
-        
-        foreach ($requiredFiles as $file) {
-            $this->assertFileExists($this->bundleDir . '/' . $file);
-        }
-    }
+        clearstatcache();
 
-    private function assertFileExists(string $file): void
-    {
-        if (!$this->filesystem->exists($file)) {
-            throw new \RuntimeException(sprintf('Le fichier source %s est introuvable dans le bundle.', basename($file)));
+        $requiredFiles = ['castor.php', 'castorPersonal.php', 'castor.yaml'];
+
+        foreach ($requiredFiles as $file) {
+            $filePath = $this->bundleDir . '/' . $file;
+            if (!$this->filesystem->exists($filePath)) {
+                throw new \RuntimeException(sprintf('Le fichier source %s est introuvable dans %s.', $file, $this->bundleDir));
+            }
         }
     }
 
@@ -76,7 +79,7 @@ class InstallCastorCommand extends Command
     {
         $targetFile = $this->projectDir . '/castor.php';
         $this->handleExistingFile($targetFile, $io);
-        
+
         $this->filesystem->copy($this->bundleDir . '/castor.php', $targetFile, true);
         $io->success('Le fichier castor.php a été installé avec succès.');
     }
@@ -103,7 +106,7 @@ class InstallCastorCommand extends Command
     private function createFileIfNotExists(string $file, SymfonyStyle $io): void
     {
         $exists = $this->filesystem->exists($file);
-        $message = $exists 
+        $message = $exists
             ? 'Le fichier %s existe déjà et a été conservé.'
             : 'Le fichier %s a été créé avec succès.';
 
@@ -116,7 +119,7 @@ class InstallCastorCommand extends Command
         $configDir = $this->projectDir . '/config/packages';
         $targetFile = $configDir . '/castor.yaml';
 
-        $this->filesystem->exists($targetFile) 
+        $this->filesystem->exists($targetFile)
             ? $io->info('Le fichier de configuration existe déjà et a été conservé.')
             : $this->createConfiguration($configDir, $targetFile, $io);
     }
@@ -140,10 +143,10 @@ class InstallCastorCommand extends Command
         ]);
     }
 
-    private function detectOS(): string 
+    private function detectOS(): string
     {
-        return file_exists('/etc/debian_version') 
-            ? 'debian' 
+        return file_exists('/etc/debian_version')
+            ? 'debian'
             : (file_exists('/etc/redhat-release') ? 'rhel' : 'debian');
     }
 }
