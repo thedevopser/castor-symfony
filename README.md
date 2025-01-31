@@ -99,6 +99,53 @@ function maTask(): void
   - Arguments :
     - `env` : Environnement cible (défaut: 'dev')
 
+### Virtual Hosts
+
+- `castor create-vhost [--ssl]` : Crée un virtual host pour votre projet
+  - Options :
+    - `--ssl` : Active la configuration SSL si les certificats sont configurés
+
+#### Configuration
+
+Ajoutez la configuration suivante dans `config/packages/castor.yaml` :
+
+```yaml
+castor:
+  vhost:
+    url: "test" # Extension du domaine (exemple: projet.test)
+    nom: ~ # Nom du projet (par défaut: nom du dossier)
+    server: "apache2" # Serveur web (apache2 ou nginx)
+    os: ~ # OS du serveur (debian, ubuntu, rhel - auto-détecté)
+    ssl:
+      enabled: false # Activer/désactiver SSL
+      certificate: ~ # Chemin vers le certificat SSL
+      certificate_key: ~ # Chemin vers la clé privée SSL
+```
+
+#### Exemples
+
+Configuration basique :
+
+```yaml
+castor:
+  vhost:
+    url: "local"
+    server: "apache2"
+```
+
+Configuration avec SSL :
+
+```yaml
+castor:
+  vhost:
+    url: "local"
+    server: "nginx"
+    ssl:
+      enabled: true
+      certificate: "/etc/ssl/certs/mon-cert.pem"
+      certificate_key: "/etc/ssl/private/mon-cert.key"
+```
+
 ---
 
 # Symfony Castor Bundle
@@ -197,3 +244,50 @@ function myTask(): void
 - `castor clean [env]`: Cleans the cache
   - Arguments:
     - `env`: Target environment (default: 'dev')
+
+### Virtual Hosts
+
+- `castor create-vhost [--ssl]`: Creates a virtual host for your project
+  - Options:
+    - `--ssl`: Enables SSL configuration if certificates are configured
+
+#### Configuration
+
+Add the following configuration in `config/packages/castor.yaml`:
+
+```yaml
+castor:
+  vhost:
+    url: "test" # Domain extension (example: project.test)
+    nom: ~ # Project name (default: folder name)
+    server: "apache2" # Web server (apache2 or nginx)
+    os: ~ # Server OS (debian, ubuntu, rhel - auto-detected)
+    ssl:
+      enabled: false # Enable/disable SSL
+      certificate: ~ # Path to SSL certificate
+      certificate_key: ~ # Path to SSL private key
+```
+
+#### Examples
+
+Basic configuration:
+
+```yaml
+castor:
+  vhost:
+    url: "local"
+    server: "apache2"
+```
+
+SSL configuration:
+
+```yaml
+castor:
+  vhost:
+    url: "local"
+    server: "nginx"
+    ssl:
+      enabled: true
+      certificate: "/etc/ssl/certs/my-cert.pem"
+      certificate_key: "/etc/ssl/private/my-cert.key"
+```

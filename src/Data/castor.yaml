@@ -4,3 +4,7 @@ castor:
         nom: ~  # Sera remplacé par le nom du dossier du projet
         server: "apache2"
         os: ~    # Sera détecté automatiquement
+        ssl:
+            enabled: false
+            certificate: ~    # Chemin vers le certificat
+            certificate_key: ~ # Chemin vers la clé privée
