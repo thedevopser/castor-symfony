@@ -44,14 +44,17 @@ jobs:
           composer remove thedevopser/castor-symfony --no-update || true
           composer config repositories.packagist false
           composer config repositories.castor-symfony '{"type": "path", "url": "../", "options": {"symlink": true}}'
+          # Activer Symfony Flex
+          composer require symfony/flex --no-update
+          composer update --no-interaction
+          # Installer le bundle
           composer require "thedevopser/castor-symfony:*@dev" --no-cache
-
-          # S'assurer que le bundle est enregistré avec la bonne syntaxe
-          echo "    TheDevOpser\\\CastorBundle\\\CastorBundle::class => ['all' => true]," >> config/bundles.php
 
       - name: Verify Installation
         run: |
           cd symfony-app
+          # Vérifier que le bundle est auto-enregistré
+          grep "TheDevOpser\\\CastorBundle\\\CastorBundle" config/bundles.php
           php bin/console debug:command castor:install
           php bin/console castor:install --no-interaction
           test -f castor.php || exit 1
