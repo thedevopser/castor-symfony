@@ -1,21 +1,21 @@
 <?php
 
 use Castor\Attribute\AsTask;
+use Castor\Context;
 
 use function Castor\io;
-use function Castor\capture;
 use function Castor\run;
 use function Castor\import;
 use function Castor\yaml_parse;
 
 import(__DIR__ . '/castorPersonal.php');
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * Installation et Initialisation
  */
 #[AsTask(description: 'Initialisation du projet Symfony')]
-function project_init(bool $node = false, bool $migrate = false) {
+function project_init(bool $node = false, bool $migrate = false)
+{
 
 
     io()->title('Initialisation du projet Symfony');
@@ -64,15 +64,11 @@ function install_packages(bool $node = false): void
     io()->title('Installation du projet');
 
     run('composer install');
-    
+
     if ($node) {
         $nodePacketManager = io()->ask('Quel packet manager utilisez-vous ? (yarn/npm)');
         run($nodePacketManager . ' install');
     }
-    
-
-    
-    
 }
 
 /**
@@ -170,7 +166,7 @@ function docker_up(): void
 }
 
 #[AsTask(description: 'Arrêt des containers Docker')]
-function docker_down():void
+function docker_down(): void
 {
     io()->title('Arrêt des containers Docker');
     run('docker-compose down');
@@ -180,72 +176,67 @@ function docker_down():void
  * Virtual Host
  */
 #[AsTask(description: 'Crée un virtual host pour le projet')]
-function createVhost(bool $ssl = false): void 
+function createVhost(bool $ssl = false): void
 {
-    $config = loadVhostConfig();
-    assertSudoRights();
-    
-    $serverName = buildServerName($config);
-    $documentRoot = sprintf('%s/public', getcwd());
-    
-    $vhostCreator = match($config['server']) {
-        'apache2' => fn() => createApacheVhost($serverName, $documentRoot, $ssl, $config['os']),
-        'nginx' => fn() => createNginxVhost($serverName, $documentRoot, $ssl),
+    $settings = loadSystemSettings();
+    verifyRootAccess();
+
+    $hostName = generateHostName($settings);
+    $webRoot = sprintf('%s/public', getcwd());
+
+    $webServer = match ($settings['server']) {
+        'apache2' => fn() => setupApacheHost($hostName, $webRoot, $ssl, $settings['os'], $settings),
+        'nginx' => fn() => setupNginxHost($hostName, $webRoot, $ssl, $settings),
         default => throw new \RuntimeException('Serveur web non supporté')
     };
 
-    $vhostCreator();    
-    io()->success(sprintf('Virtual host créé pour %s', $serverName));
+    $webServer();
+    io()->success(sprintf('Virtual host créé pour %s', $hostName));
 }
 
-function loadVhostConfig(): array 
+function loadSystemSettings(): array
 {
     try {
-        $projectDir = getcwd();
-        $configFile = $projectDir . '/config/packages/castor.yaml';
-        
-        if (!file_exists($configFile)) {
-            throw new \RuntimeException('Configuration castor.yaml manquante dans config/packages/');
-        }
+        $yamlPath = sprintf('%s/config/packages/castor.yaml', getcwd());
 
-        $config = yaml_parse(file_get_contents($configFile));
-        
-        if (!isset($config['castor']['vhost'])) {
-            throw new \RuntimeException('Configuration vhost manquante dans castor.yaml');
-        }
-        
-        return $config['castor']['vhost'];
+        !file_exists($yamlPath) && throw new \RuntimeException(
+            'Configuration castor.yaml manquante dans config/packages/'
+        );
+
+        $settings = yaml_parse(file_get_contents($yamlPath));
+
+        !isset($settings['castor']['vhost']) && throw new \RuntimeException(
+            'Configuration vhost manquante dans castor.yaml'
+        );
+
+        return $settings['castor']['vhost'];
     } catch (\Throwable $e) {
         throw new \RuntimeException(
             "Impossible de charger la configuration.\n" .
-            "Erreur: " . $e->getMessage()
+                "Erreur: " . $e->getMessage()
         );
     }
 }
 
-use Castor\Context;
-
-function assertSudoRights(): void 
+function verifyRootAccess(): void
 {
     $context = new Context();
     $context->withAllowFailure();
-    
+
     $result = run('sudo -n true 2>/dev/null', context: $context);
-    
-    if (!$result->isSuccessful()) {
-        throw new \RuntimeException('Droits sudo requis pour créer le vhost');
-    }
+
+    !$result->isSuccessful() && throw new \RuntimeException('Droits sudo requis pour créer le vhost');
 }
 
-function buildServerName(array $config): string 
+function generateHostName(array $settings): string
 {
-    $projectName = $config['nom'] ?? basename(getcwd());
-    $domain = $config['url'] ?? 'test';
-    
+    $projectName = $settings['nom'] ?? basename(getcwd());
+    $domain = $settings['url'] ?? 'test';
+
     return sprintf('%s.%s', $projectName, $domain);
 }
 
-function detectOS(): string 
+function detectOS(): string
 {
     if (file_exists('/etc/debian_version')) {
         return 'debian';
@@ -256,72 +247,137 @@ function detectOS(): string
     return 'debian'; // default
 }
 
-function createApacheVhost(string $serverName, string $documentRoot, bool $ssl, string $os): void 
+function setupApacheHost(string $hostName, string $webRoot, bool $enableSsl, string $os, array $settings): void
 {
     $isDebianBased = in_array($os, ['debian', 'ubuntu']);
-    $configPath = $isDebianBased ? '/etc/apache2/sites-available' : '/etc/httpd/conf.d';
-    $logPath = $isDebianBased ? '/var/log/apache2' : '/var/log/httpd';
-    $configFile = sprintf('%s/%s.conf', $configPath, $serverName);
+    $vhostDir = $isDebianBased ? '/etc/apache2/sites-available' : '/etc/httpd/conf.d';
+    $logsDir = $isDebianBased ? '/var/log/apache2' : '/var/log/httpd';
+    $vhostPath = sprintf('%s/%s.conf', $vhostDir, $hostName);
 
-    // Vérifier si le fichier existe déjà
-    if (file_exists($configFile)) {
-        if (!io()->confirm(sprintf('Le fichier %s existe déjà. Voulez-vous le remplacer ?', $configFile), false)) {
-            io()->warning('Création du vhost annulée.');
-            return;
-        }
-    }
+    $exists = file_exists($vhostPath);
+    $canOverwrite = !$exists || io()->confirm(
+        sprintf('Le fichier %s existe déjà. Voulez-vous le remplacer ?', $vhostPath),
+        false
+    );
 
-    $template = <<<EOF
+    (!$canOverwrite) && throw new \RuntimeException('Création du vhost annulée.');
+
+    $httpVhost = buildApacheHttpVhost($hostName, $webRoot, $logsDir);
+    $httpsVhost = buildApacheHttpsVhost($hostName, $webRoot, $logsDir, $settings);
+
+    $finalVhost = $enableSsl && hasSslCertificates($settings)
+        ? $httpVhost . "\n" . $httpsVhost
+        : $httpVhost;
+
+    file_put_contents('/tmp/vhost.conf', $finalVhost);
+    run(sprintf('sudo mv /tmp/vhost.conf %s', $vhostPath));
+
+    $context = new Context();
+    $context->withAllowFailure();
+
+    $restartCommand = $isDebianBased
+        ? sprintf('sudo a2ensite %s.conf && sudo systemctl restart apache2', $hostName)
+        : 'sudo systemctl restart httpd';
+
+    $result = run($restartCommand, context: $context);
+
+    (!$result->isSuccessful()) && throw new \RuntimeException(sprintf(
+        "Erreur lors du redémarrage du serveur web.\nConsultez les logs avec : %s",
+        $isDebianBased ? 'journalctl -xe apache2' : 'journalctl -xeu httpd.service'
+    ));
+}
+
+function buildApacheHttpVhost(string $hostName, string $webRoot, string $logsDir): string
+{
+    return <<<EOF
 <VirtualHost *:80>
-    ServerName {$serverName}
-    DocumentRoot {$documentRoot}
+    ServerName {$hostName}
+    DocumentRoot {$webRoot}
     
-    <Directory {$documentRoot}>
+    <Directory {$webRoot}>
         Options Indexes FollowSymLinks
         AllowOverride All
         Require all granted
     </Directory>
     
-    ErrorLog {$logPath}/{$serverName}_error.log
-    CustomLog {$logPath}/{$serverName}_access.log combined
+    ErrorLog {$logsDir}/{$hostName}_error.log
+    CustomLog {$logsDir}/{$hostName}_access.log combined
 </VirtualHost>
 EOF;
+}
 
-    if ($ssl) {
-        io()->warning('SSL ignoré pour les environnements locaux (.test, .local, etc.)');
-        io()->info('Pour un certificat SSL en production, utilisez Let\'s Encrypt manuellement.');
-    }
+function buildApacheHttpsVhost(string $hostName, string $webRoot, string $logsDir, array $settings): string
+{
+    return <<<EOF
+<VirtualHost *:443>
+    ServerName {$hostName}
+    DocumentRoot {$webRoot}
+    
+    SSLEngine on
+    SSLCertificateFile {$settings['ssl']['certificate']}
+    SSLCertificateKeyFile {$settings['ssl']['certificate_key']}
+    
+    <Directory {$webRoot}>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    
+    ErrorLog {$logsDir}/{$hostName}_ssl_error.log
+    CustomLog {$logsDir}/{$hostName}_ssl_access.log combined
+</VirtualHost>
+EOF;
+}
 
-    file_put_contents('/tmp/vhost.conf', $template);
-    run(sprintf('sudo mv /tmp/vhost.conf %s', $configFile));
+function hasSslCertificates(array $settings): bool
+{
+    return isset($settings['ssl'])
+        && $settings['ssl']['enabled']
+        && !empty($settings['ssl']['certificate'])
+        && !empty($settings['ssl']['certificate_key']);
+}
 
+function setupNginxHost(string $hostName, string $webRoot, bool $enableSsl, array $settings): void
+{
+    $vhostPath = sprintf('/etc/nginx/conf.d/%s.conf', $hostName);
+
+    $exists = file_exists($vhostPath);
+    $canOverwrite = !$exists || io()->confirm(
+        sprintf('Le fichier %s existe déjà. Voulez-vous le remplacer ?', $vhostPath),
+        false
+    );
+
+    (!$canOverwrite) && throw new \RuntimeException('Création du vhost annulée.');
+
+    $httpVhost = buildNginxHttpVhost($hostName, $webRoot);
+    $httpsVhost = $enableSsl && hasSslCertificates($settings)
+        ? buildNginxHttpsVhost($hostName, $webRoot, $settings)
+        : '';
+
+    $finalVhost = $httpVhost . "\n" . $httpsVhost;
+
+    file_put_contents('/tmp/vhost.conf', $finalVhost);
+    run(sprintf('sudo mv /tmp/vhost.conf %s', $vhostPath));
+
+    // Plus besoin de créer de symlink car on écrit directement dans conf.d
     $context = new Context();
     $context->withAllowFailure();
 
-    // Activation du vhost selon l'OS
-    if ($isDebianBased) {
-        run(sprintf('sudo a2ensite %s.conf', $serverName), context: $context);
-        $result = run('sudo systemctl restart apache2', context: $context);
-    } else {
-        $result = run('sudo systemctl restart httpd', context: $context);
-    }
+    $result = run('sudo systemctl restart nginx', context: $context);
 
-    if (!$result->isSuccessful()) {
-        io()->error(sprintf(
-            "Erreur lors du redémarrage du serveur web.\nConsultez les logs avec : %s",
-            $isDebianBased ? 'journalctl -xe apache2' : 'journalctl -xeu httpd.service'
-        ));
-        throw new \RuntimeException('Échec du redémarrage du serveur web');
-    }
+    (!$result->isSuccessful()) && throw new \RuntimeException(
+        "Erreur lors du redémarrage de Nginx.\n" .
+            "Consultez les logs avec : journalctl -xeu nginx.service"
+    );
 }
 
-function createNginxVhost(string $serverName, string $documentRoot, bool $ssl): void 
+function buildNginxHttpVhost(string $hostName, string $webRoot): string
 {
-    $template = <<<EOF
+    return <<<EOF
 server {
     listen 80;
-    server_name {$serverName};
-    root {$documentRoot};
+    server_name {$hostName};
+    root {$webRoot};
     
     location / {
         try_files \$uri /index.php\$is_args\$args;
@@ -340,25 +396,51 @@ server {
         return 404;
     }
     
-    error_log /var/log/nginx/{$serverName}_error.log;
-    access_log /var/log/nginx/{$serverName}_access.log;
+    error_log /var/log/nginx/{$hostName}_error.log;
+    access_log /var/log/nginx/{$hostName}_access.log;
 }
 EOF;
-
-    file_put_contents('/tmp/vhost.conf', $template);
-    run('sudo mv /tmp/vhost.conf /etc/nginx/sites-available/' . $serverName . '.conf');
-
-    if ($ssl) {
-        io()->warning('SSL ignoré pour les environnements locaux (.test, .local, etc.)');
-        io()->info('Pour un certificat SSL en production, utilisez Let\'s Encrypt manuellement.');
-    }
 }
 
-function canSudo(): bool 
+function buildNginxHttpsVhost(string $hostName, string $webRoot, array $settings): string
+{
+    return <<<EOF
+server {
+    listen 443 ssl;
+    server_name {$hostName};
+    root {$webRoot};
+    
+    ssl_certificate {$settings['ssl']['certificate']};
+    ssl_certificate_key {$settings['ssl']['certificate_key']};
+    
+    location / {
+        try_files \$uri /index.php\$is_args\$args;
+    }
+    
+    location ~ ^/index\\.php(/|$) {
+        fastcgi_pass unix:/var/run/php/php-fpm.sock;
+        fastcgi_split_path_info ^(.+\\.php)(/.*)$;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT \$realpath_root;
+        internal;
+    }
+    
+    location ~ \\.php$ {
+        return 404;
+    }
+    
+    error_log /var/log/nginx/{$hostName}_ssl_error.log;
+    access_log /var/log/nginx/{$hostName}_ssl_access.log;
+}
+EOF;
+}
+
+function canSudo(): bool
 {
     $context = new Context();
     $context->withAllowFailure();
-    
+
     $result = run('sudo -n true 2>/dev/null', context: $context);
     return $result->isSuccessful();
 }
