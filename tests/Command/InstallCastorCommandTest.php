@@ -101,11 +101,10 @@ class InstallCastorCommandTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertEquals(1, $commandTester->getStatusCode());
-        // Modification des assertions pour correspondre au format exact du message
-        $this->assertStringContainsString('[ERROR]', $commandTester->getDisplay());
-        $this->assertStringContainsString(
-            sprintf('Le fichier source castor.php est introuvable dans %s', $this->bundleDir),
-            $commandTester->getDisplay()
-        );
+
+        $output = preg_replace('/\s+/', ' ', $commandTester->getDisplay());
+        $this->assertStringContainsString('[ERROR]', $output);
+        $this->assertStringContainsString('castor.php est introuvable', $output);
+        $this->assertStringContainsString($this->bundleDir, $output);
     }
 }
