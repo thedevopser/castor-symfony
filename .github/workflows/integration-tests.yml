@@ -7,37 +7,54 @@ on:
     branches: ["main"]
 
 jobs:
-  test-install:
+  symfony-compatibility:
+    name: Symfony ${{ matrix.symfony }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        php-version: [8.0, 8.1, 8.2, 8.3]
-        symfony-version: [5.4, 6.4, 7.0]
+        include:
+          - symfony: "5.4.*"
+            php: "8.0"
+          - symfony: "6.4.*"
+            php: "8.1"
+          - symfony: "7.0.*"
+            php: "8.2"
 
     steps:
-      - name: 🛎️ Checkout du code
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: ⚡️ Installer PHP ${{ matrix.php-version }}
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
-          extensions: mbstring, intl
-          coverage: none
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xml, ctype, iconv, intl
 
-      - name: 🏗️ Installer Composer
-        run: composer self-update
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: 🎯 Créer un projet Symfony vierge
-        run: composer create-project symfony/skeleton:${{ matrix.symfony-version }} symfony_test_project --no-interaction
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
-      - name: 📦 Installer le bundle
+      - name: Create test project
         run: |
-          cd symfony_test_project
-          composer config repositories.local '{"type": "path", "url": "../"}'
-          composer require thedevopser/castor-symfony: "@dev" --no-interaction --no-progress
+          composer create-project "symfony/skeleton:${{ matrix.symfony }}" test-project --no-interaction
+          cd test-project
+          composer config extra.symfony.allow-contrib true
+          composer config repositories.local '{"type": "path", "url": "../", "options": {"symlink": false}}'
 
-      - name: ✅ Vérifier l’installation du bundle
+      - name: Install bundle
+        working-directory: test-project
         run: |
-          cd symfony_test_project
-          php bin/console --version # Vérification basique que Symfony fonctionne
+          composer require thedevopser/castor-symfony:@dev --no-scripts
+
+      - name: Test bundle installation
+        working-directory: test-project
+        run: |
+          php bin/console list | grep castor:install
