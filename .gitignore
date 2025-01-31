@@ -39,6 +39,7 @@ Thumbs.db
 # Test artifacts
 Tests/Fixtures/cache/
 Tests/Fixtures/logs/
+tests/Data/
 
 # Build artifacts
 /build/
