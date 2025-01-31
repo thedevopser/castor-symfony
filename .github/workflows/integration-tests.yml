@@ -2,9 +2,9 @@ name: Integration Tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   symfony-compatibility:
@@ -14,12 +14,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - symfony: '5.4.*'
-            php: '8.0'
-          - symfony: '6.4.*'
-            php: '8.1'
-          - symfony: '7.0.*'
-            php: '8.2'
+          - symfony: "5.4.*"
+            php: "8.0"
+          - symfony: "6.4.*"
+            php: "8.1"
+          - symfony: "7.0.*"
+            php: "8.2"
 
     steps:
       - name: Checkout
@@ -35,13 +35,20 @@ jobs:
         run: |
           composer create-project symfony/skeleton:"${{ matrix.symfony }}" symfony-app
           cd symfony-app
+          composer config minimum-stability dev
+          composer config prefer-stable true
 
       - name: Install Bundle
         run: |
           cd symfony-app
+          # Supprimer le paquet s'il existe dans le cache Composer
+          composer remove thedevopser/castor-symfony --no-update || true
+          # Configurer uniquement le dépôt local
+          composer config repositories.packagist false
           composer config repositories.castor-symfony '{"type": "path", "url": "../", "options": {"symlink": true}}'
-          composer require thedevopser/castor-symfony
-          
+          # Installer le bundle
+          composer require "thedevopser/castor-symfony:*@dev" --no-cache
+
       - name: Verify Installation
         run: |
           cd symfony-app
