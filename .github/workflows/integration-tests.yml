@@ -41,18 +41,19 @@ jobs:
       - name: Install Bundle
         run: |
           cd symfony-app
-          # Supprimer le paquet s'il existe dans le cache Composer
           composer remove thedevopser/castor-symfony --no-update || true
-          # Configurer uniquement le dépôt local
           composer config repositories.packagist false
           composer config repositories.castor-symfony '{"type": "path", "url": "../", "options": {"symlink": true}}'
-          # Installer le bundle
           composer require "thedevopser/castor-symfony:*@dev" --no-cache
+
+          # S'assurer que le bundle est enregistré
+          echo 'TheDevOpser\\CastorBundle\\CastorBundle::class => ["all" => true],' >> config/bundles.php
 
       - name: Verify Installation
         run: |
           cd symfony-app
-          php bin/console debug:container TheDevOpser\\CastorBundle\\CastorBundle
+          # Vérifier que la commande existe au lieu du service
+          php bin/console list | grep castor:install
           php bin/console castor:install --no-interaction
           test -f castor.php || exit 1
           test -f castorPersonal.php || exit 1
