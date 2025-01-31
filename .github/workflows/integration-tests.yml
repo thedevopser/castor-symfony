@@ -46,14 +46,13 @@ jobs:
           composer config repositories.castor-symfony '{"type": "path", "url": "../", "options": {"symlink": true}}'
           composer require "thedevopser/castor-symfony:*@dev" --no-cache
 
-          # S'assurer que le bundle est enregistré
-          echo 'TheDevOpser\\CastorBundle\\CastorBundle::class => ["all" => true],' >> config/bundles.php
+          # S'assurer que le bundle est enregistré avec la bonne syntaxe
+          echo "    TheDevOpser\\\CastorBundle\\\CastorBundle::class => ['all' => true]," >> config/bundles.php
 
       - name: Verify Installation
         run: |
           cd symfony-app
-          # Vérifier que la commande existe au lieu du service
-          php bin/console list | grep castor:install
+          php bin/console debug:command castor:install
           php bin/console castor:install --no-interaction
           test -f castor.php || exit 1
           test -f castorPersonal.php || exit 1
