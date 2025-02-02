@@ -50,11 +50,11 @@ function project_init(bool $node = false, bool $migrate = false)
     run("sed -i 's|^MAILER_DSN=.*|$mailerDsn|' .env.local");
 
     io()->info('Création de la BDD');
-    run('bin/console d:d:c --if-not-exists');
+    run('php bin/console d:d:c --if-not-exists');
 
     if ($migrate) {
         io()->info('Migration de la BDD');
-        run('bin/console d:m:m -n');
+        run('php bin/console d:m:m -n');
     }
 }
 
@@ -78,21 +78,21 @@ function install_packages(bool $node = false): void
 function create_db(): void
 {
     io()->title('Creation de la BDD');
-    run('php bin/console d:d:c --if-not-exists');
+    run('php php bin/console d:d:c --if-not-exists');
 }
 
 #[AsTask(description: 'Création des migrations')]
 function create_migration(): void
 {
     io()->title('Creation des migrations');
-    run('php bin/console make:migration');
+    run('php php bin/console make:migration');
 }
 
 #[AsTask(description: 'Migration de la base de données')]
 function migrate(): void
 {
     io()->title('Migration de la BDD');
-    run('php bin/console d:m:m -n');
+    run('php php bin/console d:m:m -n');
 }
 
 /**
@@ -151,7 +151,7 @@ function rebase(string $branch): void
 #[AsTask(description: 'Nettoie le projet')]
 function clean(string $env = 'dev'): void
 {
-    run(sprintf('bin/console c:c --env=%s', escapeshellarg($env)));
+    run(sprintf('php bin/console c:c --env=%s', escapeshellarg($env)));
 }
 
 /**
