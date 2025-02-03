@@ -115,39 +115,58 @@ Ajoutez la configuration suivante dans `config/packages/castor.yaml` :
 ```yaml
 castor:
   vhost:
-    url: "test" # Extension du domaine (exemple: projet.test)
-    nom: ~ # Nom du projet (par défaut: nom du dossier)
-    server: "apache2" # Serveur web (apache2 ou nginx)
-    os: ~ # OS du serveur (debian, ubuntu, rhel - auto-détecté)
+    url: "%env(CASTOR_VHOST_URL)%"
+    nom: null
+    server: "%env(CASTOR_VHOST_SERVER)%"
+    os: null
     ssl:
-      enabled: false # Activer/désactiver SSL
-      certificate: ~ # Chemin vers le certificat SSL
-      certificate_key: ~ # Chemin vers la clé privée SSL
+      enabled: "%env(CASTOR_VHOST_SSL_ENABLE)%"
+      certificate: null
+      certificate_key: null
+```
+Certaines de ces variables peuvent être définies dans le fichier .env :
+
+```dotenv
+CASTOR_VHOST_URL=local
+CASTOR_VHOST_SERVER=apache2
+CASTOR_VHOST_SSL_ENABLE=false
 ```
 
 #### Exemples
 
-Configuration basique :
+Configuration basique:
 
 ```yaml
 castor:
   vhost:
-    url: "local"
-    server: "apache2"
+    url: "%env(CASTOR_VHOST_URL)%"
+    server: "%env(CASTOR_VHOST_SERVER)%"
 ```
 
-Configuration avec SSL :
+```dotenv
+CASTOR_VHOST_SERVER=apache2
+CASTOR_VHOST_URL="dev.local"
+```
+
+Configuration avec SSL:
 
 ```yaml
 castor:
   vhost:
-    url: "local"
-    server: "nginx"
+    url: "%env(CASTOR_VHOST_URL)%"
+    nom: "mysuperproject"
+    server: "%env(CASTOR_VHOST_SERVER)%"
+    os: "rhel"
     ssl:
-      enabled: true
-      certificate: "/etc/ssl/certs/mon-cert.pem"
-      certificate_key: "/etc/ssl/private/mon-cert.key"
+      enabled: "%env(CASTOR_VHOST_SSL_ENABLE)%"
+      certificate: "/etc/ssl/certs/my-cert.pem"
+      certificate_key: "/etc/ssl/private/my-cert.key"
 ```
+```dotenv
+CASTOR_VHOST_SERVER=nginx
+CASTOR_VHOST_URL="dev.local"
+CASTOR_VHOST_SSL_ENABLE=true
+``` 
 
 ---
 
@@ -273,7 +292,7 @@ castor:
       certificate: null
       certificate_key: null
 ```
-Certaines de ces variables peuvent être définies dans le fichier .env :
+Variables can be defined in the .env file:
 
 ```dotenv
 CASTOR_VHOST_URL=local
