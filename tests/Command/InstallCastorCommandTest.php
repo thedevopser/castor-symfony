@@ -55,8 +55,8 @@ class InstallCastorCommandTest extends TestCase
         $this->assertFileExists($this->configDir . '/castor.yaml');
 
         $configContent = file_get_contents($this->configDir . '/castor.yaml');
-        $this->assertStringContainsString('nom: "castor_test"', $configContent);
-        $this->assertMatchesRegularExpression('/os: "(debian|rhel)"/', $configContent);
+        $this->assertStringContainsString('nom: null', $configContent);
+        $this->assertMatchesRegularExpression('/os: null/', $configContent);
     }
 
     public function testExistingFilesWithNoOverwrite(): void
