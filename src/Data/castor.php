@@ -236,17 +236,6 @@ function generateHostName(array $settings): string
     return sprintf('%s.%s', $projectName, $domain);
 }
 
-function detectOS(): string
-{
-    if (file_exists('/etc/debian_version')) {
-        return 'debian';
-    }
-    if (file_exists('/etc/redhat-release')) {
-        return 'rhel';
-    }
-    return 'debian'; // default
-}
-
 function setupApacheHost(string $hostName, string $webRoot, bool $enableSsl, string $os, array $settings): void
 {
     $isDebianBased = in_array($os, ['debian', 'ubuntu']);
