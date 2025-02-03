@@ -264,14 +264,21 @@ Add the following configuration in `config/packages/castor.yaml`:
 ```yaml
 castor:
   vhost:
-    url: "test" # Domain extension (example: project.test)
-    nom: ~ # Project name (default: folder name)
-    server: "apache2" # Web server (apache2 or nginx)
-    os: ~ # Server OS (debian, ubuntu, rhel - auto-detected)
+    url: "%env(CASTOR_VHOST_URL)%"
+    nom: null
+    server: "%env(CASTOR_VHOST_SERVER)%"
+    os: null
     ssl:
-      enabled: false # Enable/disable SSL
-      certificate: ~ # Path to SSL certificate
-      certificate_key: ~ # Path to SSL private key
+      enabled: "%env(CASTOR_VHOST_SSL_ENABLE)%"
+      certificate: null
+      certificate_key: null
+```
+Certaines de ces variables peuvent être définies dans le fichier .env :
+
+```dotenv
+CASTOR_VHOST_URL=local
+CASTOR_VHOST_SERVER=apache2
+CASTOR_VHOST_SSL_ENABLE=false
 ```
 
 #### Examples
@@ -281,8 +288,13 @@ Basic configuration:
 ```yaml
 castor:
   vhost:
-    url: "local"
-    server: "apache2"
+    url: "%env(CASTOR_VHOST_URL)%"
+    server: "%env(CASTOR_VHOST_SERVER)%"
+```
+
+```dotenv
+CASTOR_VHOST_SERVER=apache2
+CASTOR_VHOST_URL="dev.local"
 ```
 
 SSL configuration:
@@ -290,10 +302,17 @@ SSL configuration:
 ```yaml
 castor:
   vhost:
-    url: "local"
-    server: "nginx"
+    url: "%env(CASTOR_VHOST_URL)%"
+    nom: "mysuperproject"
+    server: "%env(CASTOR_VHOST_SERVER)%"
+    os: "rhel"
     ssl:
-      enabled: true
+      enabled: "%env(CASTOR_VHOST_SSL_ENABLE)%"
       certificate: "/etc/ssl/certs/my-cert.pem"
       certificate_key: "/etc/ssl/private/my-cert.key"
 ```
+```dotenv
+CASTOR_VHOST_SERVER=nginx
+CASTOR_VHOST_URL="dev.local"
+CASTOR_VHOST_SSL_ENABLE=true
+``` 

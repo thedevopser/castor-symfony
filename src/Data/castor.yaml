@@ -1,10 +1,10 @@
 castor:
     vhost:
-        url: "test"
-        nom: ~  # Sera remplacé par le nom du dossier du projet
-        server: "apache2"
-        os: ~    # Sera détecté automatiquement
+        url: "%env(CASTOR_VHOST_URL)%"
+        nom: null
+        server: "%env(CASTOR_VHOST_SERVER)%"
+        os: null
         ssl:
-            enabled: false
-            certificate: ~    # Chemin vers le certificat
-            certificate_key: ~ # Chemin vers la clé privée
+            enabled: "%env(CASTOR_VHOST_SSL_ENABLE)%"
+            certificate: null
+            certificate_key: null
