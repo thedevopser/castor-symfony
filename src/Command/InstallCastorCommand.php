@@ -137,8 +137,8 @@ class InstallCastorCommand extends Command
         $os = $this->detectOS();
 
         return strtr($config, [
-            'nom: ~' => sprintf('nom: "%s"', $projectName),
-            'os: ~' => sprintf('os: "%s"', $os)
+            'nom: null' => sprintf('nom: "%s"', $projectName),
+            'os: null' => sprintf('os: "%s"', $os)
         ]);
     }
 
