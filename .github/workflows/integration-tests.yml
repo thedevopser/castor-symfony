@@ -47,13 +47,11 @@ jobs:
           composer create-project "symfony/skeleton:${{ matrix.symfony }}" test-project --no-interaction
           cd test-project
           composer config extra.symfony.allow-contrib true
-          composer config repositories.local '{"type": "path", "url": "../", "options": {"symlink": false}}'
 
       - name: Install bundle
         working-directory: test-project
         run: |
-          composer require thedevopser/castor-symfony:@dev --no-scripts
-          composer run-script post-install-cmd
+          composer require thedevopser/castor-symfony:^1.0
 
       - name: Test bundle installation
         working-directory: test-project
