@@ -37,7 +37,7 @@
   },
   "scripts": {
     "post-install-cmd": [
-      "php scripts/post-install.php"
+      "php vendor/thedevopser/castor-symfony/scripts/post-install.php"
     ]
   },
   "minimum-stability": "stable"

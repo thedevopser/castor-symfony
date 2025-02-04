@@ -53,6 +53,7 @@ jobs:
         working-directory: test-project
         run: |
           composer require thedevopser/castor-symfony:@dev --no-scripts
+          composer run-script post-install-cmd
 
       - name: Test bundle installation
         working-directory: test-project
