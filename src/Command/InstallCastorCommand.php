@@ -40,9 +40,9 @@ class InstallCastorCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
+            $this->installConfiguration($io);
             $this->assertSourceFilesExist();
             $this->installCastorFiles($io);
-            $this->installConfiguration($io);
 
             return Command::SUCCESS;
         } catch (\RuntimeException $e) {
@@ -132,14 +132,7 @@ class InstallCastorCommand extends Command
 
     private function prepareConfigurationContent(): string
     {
-        $config = file_get_contents($this->bundleDir . '/castor.yaml');
-        $projectName = basename($this->projectDir);
-        $os = $this->detectOS();
-
-        return strtr($config, [
-            'nom: null' => sprintf('nom: "%s"', $projectName),
-            'os: null' => sprintf('os: "%s"', $os)
-        ]);
+        return file_get_contents($this->bundleDir . '/castor.yaml');
     }
 
     private function detectOS(): string
