@@ -1,7 +1,6 @@
 # Castor Bundle pour Symfony
 
 [![Unit Tests](https://github.com/thedevopser/castor-symfony/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/thedevopser/castor-symfony/actions/workflows/unit-tests.yml)
-[![Integration Tests](https://github.com/thedevopser/castor-symfony/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/thedevopser/castor-symfony/actions/workflows/integration-tests.yml)
 
 [English version below](#symfony-castor-bundle)
 
