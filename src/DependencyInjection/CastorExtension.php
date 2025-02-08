@@ -1,26 +1,34 @@
 <?php
 
-namespace TheDevOpser\CastorBundle\DependencyInjection;
+    namespace TheDevOpser\CastorBundle\DependencyInjection;
 
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use TheDevOpser\CastorBundle\Command\InstallCastorCommand;
+    use Symfony\Component\DependencyInjection\ContainerBuilder;
+    use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+    use TheDevOpser\CastorBundle\Command\InstallCastorCommand;
 
-class CastorExtension extends Extension
-{
-    public function load(array $configs, ContainerBuilder $container): void
+    class CastorExtension extends Extension
     {
-        $configuration = new Configuration();
-        $this->processConfiguration($configuration, $configs);
+        public function load(array $configs, ContainerBuilder $container): void
+        {
+            $configuration = new Configuration();
+            $config = $this->processConfiguration($configuration, $configs);
 
-        $container->register(InstallCastorCommand::class)
-            ->addTag('console.command')
-            ->setAutoconfigured(true)
-            ->setAutowired(true);
-    }
+            $container->setParameter('castor.vhost.url', $config['vhost']['url']);
+            $container->setParameter('castor.vhost.nom', $config['vhost']['nom']);
+            $container->setParameter('castor.vhost.server', $config['vhost']['server']);
+            $container->setParameter('castor.vhost.os', $config['vhost']['os']);
+            $container->setParameter('castor.vhost.ssl.enabled', $config['vhost']['ssl']['enabled']);
+            $container->setParameter('castor.vhost.ssl.certificate', $config['vhost']['ssl']['certificate']);
+            $container->setParameter('castor.vhost.ssl.certificate_key', $config['vhost']['ssl']['certificate_key']);
 
-    public function getAlias(): string
-    {
-        return 'castor';
+            $container->register(InstallCastorCommand::class)
+                ->addTag('console.command')
+                ->setAutoconfigured(true)
+                ->setAutowired(true);
+        }
+
+        public function getAlias(): string
+        {
+            return 'castor';
+        }
     }
-}

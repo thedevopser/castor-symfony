@@ -116,20 +116,24 @@ Ajoutez la configuration suivante dans `config/packages/castor.yaml` :
 castor:
   vhost:
     url: "%env(CASTOR_VHOST_URL)%"
-    nom: null
+    nom: "%env(CASTOR_VHOST_NOM)%"
     server: "%env(CASTOR_VHOST_SERVER)%"
-    os: null
+    os: "%env(CASTOR_VHOST_OS)%"
     ssl:
-      enabled: "%env(CASTOR_VHOST_SSL_ENABLE)%"
-      certificate: null
-      certificate_key: null
+      enabled: "%env(bool:CASTOR_VHOST_SSL_ENABLE)%"
+      certificate: "%env(CASTOR_VHOST_SSL_CERTIFICATE)%"
+      certificate_key: "%env(CASTOR_VHOST_SSL_CERTIFICATE_KEY)%"
 ```
 Certaines de ces variables peuvent être définies dans le fichier .env :
 
 ```dotenv
 CASTOR_VHOST_URL=local
+CASTOR_VHOST_NOM=example
 CASTOR_VHOST_SERVER=apache2
-CASTOR_VHOST_SSL_ENABLE=false
+CASTOR_VHOST_OS=debian
+CASTOR_VHOST_SSL_ENABLE=0
+CASTOR_VHOST_SSL_CERTIFICATE=/path/to/certificate.crt
+CASTOR_VHOST_SSL_CERTIFICATE_KEY=/path/to/certificate.key
 ```
 
 #### Exemples
@@ -154,18 +158,22 @@ Configuration avec SSL:
 castor:
   vhost:
     url: "%env(CASTOR_VHOST_URL)%"
-    nom: "mysuperproject"
+    nom: "%env(CASTOR_VHOST_NOM)%"
     server: "%env(CASTOR_VHOST_SERVER)%"
-    os: "rhel"
+    os: "%env(CASTOR_VHOST_OS)%"
     ssl:
-      enabled: "%env(CASTOR_VHOST_SSL_ENABLE)%"
-      certificate: "/etc/ssl/certs/my-cert.pem"
-      certificate_key: "/etc/ssl/private/my-cert.key"
+      enabled: "%env(bool:CASTOR_VHOST_SSL_ENABLE)%"
+      certificate: "%env(CASTOR_VHOST_SSL_CERTIFICATE)%"
+      certificate_key: "%env(CASTOR_VHOST_SSL_CERTIFICATE_KEY)%"
 ```
 ```dotenv
-CASTOR_VHOST_SERVER=nginx
 CASTOR_VHOST_URL="dev.local"
-CASTOR_VHOST_SSL_ENABLE=true
+CASTOR_VHOST_NOM="mysuperproject"
+CASTOR_VHOST_SERVER="apache2"
+CASTOR_VHOST_OS="debian"
+CASTOR_VHOST_SSL_ENABLE=0
+CASTOR_VHOST_SSL_CERTIFICATE="/path/to/certificate.crt"
+CASTOR_VHOST_SSL_CERTIFICATE_KEY="/path/to/certificate.key"
 ``` 
 
 ---
@@ -284,20 +292,24 @@ Add the following configuration in `config/packages/castor.yaml`:
 castor:
   vhost:
     url: "%env(CASTOR_VHOST_URL)%"
-    nom: null
+    nom: "%env(CASTOR_VHOST_NOM)%"
     server: "%env(CASTOR_VHOST_SERVER)%"
-    os: null
+    os: "%env(CASTOR_VHOST_OS)%"
     ssl:
-      enabled: "%env(CASTOR_VHOST_SSL_ENABLE)%"
-      certificate: null
-      certificate_key: null
+      enabled: "%env(bool:CASTOR_VHOST_SSL_ENABLE)%"
+      certificate: "%env(CASTOR_VHOST_SSL_CERTIFICATE)%"
+      certificate_key: "%env(CASTOR_VHOST_SSL_CERTIFICATE_KEY)%"
 ```
 Variables can be defined in the .env file:
 
 ```dotenv
 CASTOR_VHOST_URL=local
+CASTOR_VHOST_NOM=example
 CASTOR_VHOST_SERVER=apache2
-CASTOR_VHOST_SSL_ENABLE=false
+CASTOR_VHOST_OS=debian
+CASTOR_VHOST_SSL_ENABLE=0
+CASTOR_VHOST_SSL_CERTIFICATE=/path/to/certificate.crt
+CASTOR_VHOST_SSL_CERTIFICATE_KEY=/path/to/certificate.key
 ```
 
 #### Examples
@@ -322,16 +334,20 @@ SSL configuration:
 castor:
   vhost:
     url: "%env(CASTOR_VHOST_URL)%"
-    nom: "mysuperproject"
+    nom: "%env(CASTOR_VHOST_NOM)%"
     server: "%env(CASTOR_VHOST_SERVER)%"
-    os: "rhel"
+    os: "%env(CASTOR_VHOST_OS)%"
     ssl:
-      enabled: "%env(CASTOR_VHOST_SSL_ENABLE)%"
-      certificate: "/etc/ssl/certs/my-cert.pem"
-      certificate_key: "/etc/ssl/private/my-cert.key"
+      enabled: "%env(bool:CASTOR_VHOST_SSL_ENABLE)%"
+      certificate: "%env(CASTOR_VHOST_SSL_CERTIFICATE)%"
+      certificate_key: "%env(CASTOR_VHOST_SSL_CERTIFICATE_KEY)%"
 ```
 ```dotenv
-CASTOR_VHOST_SERVER=nginx
 CASTOR_VHOST_URL="dev.local"
-CASTOR_VHOST_SSL_ENABLE=true
+CASTOR_VHOST_NOM="mysuperproject"
+CASTOR_VHOST_SERVER="apache2"
+CASTOR_VHOST_OS="debian"
+CASTOR_VHOST_SSL_ENABLE=0
+CASTOR_VHOST_SSL_CERTIFICATE="/path/to/certificate.crt"
+CASTOR_VHOST_SSL_CERTIFICATE_KEY="/path/to/certificate.key"
 ``` 
