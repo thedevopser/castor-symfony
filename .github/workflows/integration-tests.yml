@@ -51,7 +51,7 @@ jobs:
       - name: Install bundle
         working-directory: test-project
         run: |
-          composer require thedevopser/castor-symfony:^1.0
+          composer require thedevopser/castor-symfony
 
       - name: Test bundle installation
         working-directory: test-project
