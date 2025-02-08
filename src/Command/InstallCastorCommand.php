@@ -11,7 +11,6 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class InstallCastorCommand extends Command
 {
-    // Définir le nom et la description comme propriétés statiques
     protected static $defaultName = 'castor:install';
     protected static $defaultDescription = 'Installe le fichier castor.php à la racine du projet';
 
@@ -40,7 +39,6 @@ class InstallCastorCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $this->installConfiguration($io);
             $this->assertSourceFilesExist();
             $this->installCastorFiles($io);
 
@@ -58,7 +56,7 @@ class InstallCastorCommand extends Command
     {
         clearstatcache();
 
-        $requiredFiles = ['castor.php', 'castorPersonal.php', 'castor.yaml'];
+        $requiredFiles = ['castor.php', 'castorPersonal.php'];
 
         foreach ($requiredFiles as $file) {
             $filePath = $this->bundleDir . '/' . $file;
@@ -111,34 +109,5 @@ class InstallCastorCommand extends Command
 
         $exists || $this->filesystem->copy($this->bundleDir . '/castorPersonal.php', $file);
         $io->info(sprintf($message, basename($file)));
-    }
-
-    private function installConfiguration(SymfonyStyle $io): void
-    {
-        $configDir = $this->projectDir . '/config/packages';
-        $targetFile = $configDir . '/castor.yaml';
-
-        $this->filesystem->exists($targetFile)
-            ? $io->info('Le fichier de configuration existe déjà et a été conservé.')
-            : $this->createConfiguration($configDir, $targetFile, $io);
-    }
-
-    private function createConfiguration(string $configDir, string $targetFile, SymfonyStyle $io): void
-    {
-        $this->filesystem->mkdir($configDir);
-        $this->filesystem->dumpFile($targetFile, $this->prepareConfigurationContent());
-        $io->success('Le fichier de configuration castor.yaml a été créé avec succès.');
-    }
-
-    private function prepareConfigurationContent(): string
-    {
-        return file_get_contents($this->bundleDir . '/castor.yaml');
-    }
-
-    private function detectOS(): string
-    {
-        return file_exists('/etc/debian_version')
-            ? 'debian'
-            : (file_exists('/etc/redhat-release') ? 'rhel' : 'debian');
     }
 }
