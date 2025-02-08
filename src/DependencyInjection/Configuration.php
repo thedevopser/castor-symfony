@@ -12,27 +12,24 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder('castor');
         $rootNode = $treeBuilder->getRootNode();
 
+
         $rootNode
             ->children()
-                ->arrayNode('vhost')
-                    ->children()
-                        ->scalarNode('url')->isRequired()->end()
-                        ->scalarNode('nom')->isRequired()->end()
-                        ->scalarNode('server')
-                            ->defaultValue('apache2')
-                        ->end()
-                        ->scalarNode('os')
-                            ->defaultValue('debian')
-                        ->end()
-                        ->arrayNode('ssl')
-                            ->canBeEnabled()
-                            ->children()
-                                ->scalarNode('certificate')->end()
-                                ->scalarNode('certificate_key')->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
+            ->arrayNode('vhost')
+            ->children()
+            ->scalarNode('url')->isRequired()->end()
+            ->scalarNode('nom')->defaultNull()->end()
+            ->scalarNode('server')->defaultValue('apache2')->end()
+            ->scalarNode('os')->defaultValue('debian')->end()
+            ->arrayNode('ssl')
+            ->canBeEnabled()
+            ->children()
+            ->scalarNode('certificate')->defaultNull()->end()
+            ->scalarNode('certificate_key')->defaultNull()->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
             ->end()
         ;
 

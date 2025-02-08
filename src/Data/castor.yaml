@@ -1,10 +1,10 @@
 castor:
     vhost:
         url: "%env(CASTOR_VHOST_URL)%"
-        nom: null
+        nom: "%env(CASTOR_VHOST_NOM)%"
         server: "%env(CASTOR_VHOST_SERVER)%"
-        os: null
+        os: "%env(CASTOR_VHOST_OS)%"
         ssl:
             enabled: "%env(bool:CASTOR_VHOST_SSL_ENABLE)%"
-            certificate: null
-            certificate_key: null
+            certificate: "%env(CASTOR_VHOST_SSL_CERTIFICATE)%"
+            certificate_key: "%env(CASTOR_VHOST_SSL_CERTIFICATE_KEY)%"
