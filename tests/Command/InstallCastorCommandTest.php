@@ -14,7 +14,6 @@ class InstallCastorCommandTest extends TestCase
     private $filesystem;
     private $projectDir;
     private $bundleDir;
-    private $configDir;
 
     protected function setUp(): void
     {
@@ -22,7 +21,6 @@ class InstallCastorCommandTest extends TestCase
         $this->filesystem = new Filesystem();
         $this->projectDir = sys_get_temp_dir() . '/castor_test';
         $this->bundleDir = dirname(__DIR__) . '/Data';
-        $this->configDir = $this->projectDir . '/config/packages';
 
         $this->kernel->method('getProjectDir')
             ->willReturn($this->projectDir);
@@ -33,7 +31,6 @@ class InstallCastorCommandTest extends TestCase
         $castorContent = file_get_contents(dirname(__DIR__, 2) . '/src/Data/castor.php');
         $this->filesystem->dumpFile($this->bundleDir . '/castor.php', $castorContent);
         $this->filesystem->dumpFile($this->bundleDir . '/castorPersonal.php', '<?php // Test personal file');
-        $this->filesystem->dumpFile($this->bundleDir . '/castor.yaml', "castor:\n    vhost:\n        url: \"test\"\n        nom: ~\n        server: \"apache2\"\n        os: ~\n        ssl:\n            enabled: false\n            certificate: ~\n            certificate_key: ~");
     }
 
     protected function tearDown(): void
@@ -52,11 +49,6 @@ class InstallCastorCommandTest extends TestCase
         $this->assertEquals(0, $commandTester->getStatusCode());
         $this->assertFileExists($this->projectDir . '/castor.php');
         $this->assertFileExists($this->projectDir . '/castorPersonal.php');
-        $this->assertFileExists($this->configDir . '/castor.yaml');
-
-        $configContent = file_get_contents($this->configDir . '/castor.yaml');
-        $this->assertStringContainsString('%env(CASTOR_VHOST_URL)%', $configContent);
-        $this->assertStringContainsString('%env(CASTOR_VHOST_SERVER)%', $configContent);
     }
 
     public function testExistingFilesWithNoOverwrite(): void
