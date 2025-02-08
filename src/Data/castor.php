@@ -196,21 +196,28 @@ function loadSystemSettings(): array
     try {
         $yamlPath = sprintf('%s/config/packages/castor.yaml', getcwd());
 
-        !file_exists($yamlPath) && throw new \RuntimeException(
-            'Configuration castor.yaml manquante dans config/packages/'
-        );
+        if (!file_exists($yamlPath)) {
+            throw new \RuntimeException('Configuration castor.yaml manquante dans config/packages/');
+        }
 
         $settings = yaml_parse(file_get_contents($yamlPath));
 
-        !isset($settings['castor']['vhost']) && throw new \RuntimeException(
-            'Configuration vhost manquante dans castor.yaml'
-        );
+        if (!isset($settings['castor']['vhost'])) {
+            throw new \RuntimeException('Configuration vhost manquante dans castor.yaml');
+        }
+
+        array_walk_recursive($settings, function (&$value) {
+            if (is_string($value) && preg_match('/^%env\((.+)\)%$/', $value, $matches)) {
+                $envVar = $matches[1];
+                $value = getenv($envVar) ?: $value;
+            }
+        });
 
         return $settings['castor']['vhost'];
     } catch (\Throwable $e) {
         throw new \RuntimeException(
             "Impossible de charger la configuration.\n" .
-                "Erreur: " . $e->getMessage()
+            "Erreur: " . $e->getMessage()
         );
     }
 }
